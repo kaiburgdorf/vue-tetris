@@ -1,34 +1,75 @@
 <template>
   <div class="hello">
     
-    <div class="row" v-for="row in 20" :key="row">
-      <div class="boardSquare" v-for="square in 10" :key="square">
+    <div class="row" v-for="row in _board" :key="row[0].row">
+      <div class="boardSquare" v-for="square in row" :key="square.id" :style="{'background-color': _board[square.row][square.col].value}" @click="play">
+        {{square.id}}
       </div>
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { Component, Prop, Vue } from 'vue-property-decorator';
+import { Component, Vue } from 'vue-property-decorator';
+import Tetris from './tetris/Tetris.vue';
 
 @Component
 export default class HelloWorld extends Vue {
-  @Prop() private msg!: string;
-  private board: boolean[];
+  private board: { value: String, row: number, col: number, id: number }[][];
+  private t: Tetris;
 
   constructor() {
     super();
-        this.board = new Array<boolean>();
-        this.board[0] = true;
-        this.board[1] = true;
-        this.board[2] = true;
-        this.board[3] = true;
-        this.board[4] = true;
+        this.board = new Array();
+
+        let i: number = 0;
+        while(i < 20) {
+          this.board[i] = new Array();
+          let j: number = 0;
+          while(j < 10) {
+            let id = i*10 + j;
+            this.board[i][j] = { value: "green", id: id, row: i, col: j };
+            j++;
+          }
+          i++;
+        }
+
+        this.t = new Tetris();
+        console.log(this.t.testFunction());
   }
 
-  beforeCreate() {
-    
+  
+  public get _board() : Array<{value: String, id: number, row: number, col: number}[]> {
+    return this.board;
   }
+
+
+  
+
+
+  toggleSquare(row: number, col: number) {
+
+    this.board[row][col].value = "black";
+
+    return true;
+  }
+
+  sleep(ms:number) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    })
+  }
+
+
+  async play() {
+    let i: number = 0;
+    while(i < 20) {
+      this.toggleSquare(i, 4);
+      await this.sleep(1000);
+      i++;
+    }
+  }
+
 
 
 }
@@ -38,9 +79,9 @@ export default class HelloWorld extends Vue {
 <style scoped>
 
 .boardSquare {
-  width: 48px;
-  height: 48px;
-  border: 1px solid;
+  width: 4.5vw;
+  height: 4.5vw;
+  border: 0.5vw solid;
   background-color: #fff;
   flex-flow: column;
 }
@@ -52,6 +93,6 @@ export default class HelloWorld extends Vue {
 .row {
   display: flex;
   background-color: gray;
-  width: 500px;
+  width: 100%;
 }
 </style>
